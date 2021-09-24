@@ -1,7 +1,7 @@
 Assignment 4 - Components
 ===
 
-Due: October 11th, by 11:59 PM.
+Due: October 4th, by 11:59 AM.
 
 For this assignment you will re-implement the client side portion of A3 using either React or Svelte components.
 
