@@ -46,7 +46,6 @@ client.connect()
             // blank query returns all documents
         return collection.find({}).toArray()
     })
-    // .then(console.log)
 
 app.post("/reviews", bodyParser.json(), (request, response) => {
     if (collection !== null) {
@@ -134,8 +133,11 @@ app.post("/add", bodyParser.json(), (request, response) => {
     collection.insertOne(request.body)
         .then(insertResponse => collection.findOne(insertResponse.insertedId))
         .then(findResponse => {
-            console.log(findResponse)
-            response.json(findResponse)
+            collection
+                .find({ "user": request.body.user })
+                .toArray()
+                .then(result => response.json(result))
+                .catch(err => console.log(err));
         });
 });
 
@@ -143,7 +145,6 @@ app.post("/remove", bodyParser.json(), (request, response) => {
     collection
         .deleteOne({ _id: ObjectId(request.body._id) })
         .then(result => {
-            console.log(result)
             response.json(result)
         });
 });
@@ -153,7 +154,6 @@ app.post('/update', bodyParser.json(), (request, response) => {
     collection
         .findOneAndUpdate({ _id: ObjectId(request.body._id) }, { $set: { review: request.body.review, user: request.body.user } })
         .then(result => {
-            console.log(result)
             response.json(result)
         });
 });

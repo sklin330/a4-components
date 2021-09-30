@@ -1,26 +1,135 @@
 
 import React from "react";
 
-let user = localStorage["username"];
+let user = localStorage["username"]
 
 class Review extends React.Component {
   // our .render() method creates a block of HTML using the .jsx format
   render() {
     return <tr>
-      <td class="d-none">{this.props._id}</td>
+      <td class="d-none">{this.props.id}</td>
       <td colSpan="1">{this.props.title}</td>
       <td colSpan="1">{this.props.author}</td>
       <td colSpan="1">{this.props.rating}</td>
       <td colSpan="2">{this.props.description}</td>
-      <td colSpan="1"><button id="edit" class="btn btn-primary" onClick={ e => this.edit( e )}>Edit</button></td>
+      <td colSpan="1">
+        <button class="btn btn-primary" onClick={ e => this.edit( e )}>Edit</button>
+        <button class="btn btn-success d-none" onClick={ e => this.save( e )}>Save</button>
+      </td>
       <td colSpan="1"><button id="delete" class="btn btn-danger" onClick={ e => this.delete( e )}>Delete</button></td>
     </tr>
   }
-  // call this method when the checkbox for this component is clicked
-  change(e) {
-    this.props.onclick( this.props.name, e.target.checked )
+
+  delete(e) {
+
+    e.preventDefault();
+
+    e = e || window.event;
+    var target = e.target;
+    while (target && target.nodeName !== "TR") {
+        target = target.parentNode;
+    }
+    if (target) {
+
+        let cells = target.getElementsByTagName("td");
+        let body = JSON.stringify({ "_id": cells[0].innerHTML })
+
+        fetch('/remove', {
+            method: 'POST',
+            body,
+            headers: {
+              //bodyparser only kicks in if the content type is application/json
+              "Content-Type": "application/json"
+            }
+         })
+            .then(function(response) {
+              target.parentNode.removeChild(target)
+            })
+    }
   }
 
+  edit(e) {
+    
+    e.preventDefault();
+
+    e = e || window.event;
+    var target = e.target;
+    while (target && target.nodeName !== "TR") {
+        target = target.parentNode;
+    }
+    if (target) {
+
+        let cells = target.getElementsByTagName("td");
+
+        let titleValue = cells[1].innerHTML;
+        cells[1].innerHTML = "<input type='text' class='w-100' value='" + String(titleValue) + "'>";
+
+        let authorValue = cells[2].innerHTML;
+        cells[2].innerHTML = "<input type='text' class='w-100'  value='" + String(authorValue) + "'>";
+
+        let ratingValue = cells[3].innerHTML;
+        cells[3].innerHTML = "<input type='number' class='w-100' value='" + String(ratingValue) + "'>";
+
+        let descriptionValue = cells[4].innerHTML;
+        cells[4].innerHTML = "<textarea rows='4' cols='40'>" + String(descriptionValue) + "</textarea>";
+        
+        let td = e.target.parentNode
+        let buttons = td.getElementsByTagName("button");
+        buttons[0].classList.add("d-none")
+        buttons[1].classList.remove("d-none")
+    }
+  }
+
+  save(e) {
+    e.preventDefault();
+
+    e = e || window.event;
+    var target = e.target;
+    while (target && target.nodeName !== "TR") {
+        target = target.parentNode;
+    }
+    if (target) {
+        let cells = target.getElementsByTagName("td");
+
+        let title = (cells[1].getElementsByTagName("input"))[0].value;
+        let author = (cells[2].getElementsByTagName("input"))[0].value;
+        let rating = (cells[3].getElementsByTagName("input"))[0].value;
+        let description = (cells[4].getElementsByTagName("textarea"))[0].value;
+        
+        if (!title.trim() || !author.trim() || !rating.trim()  || !description.trim()) {
+            //do nothing
+        } else {
+
+            let updatedReview = { "title": title, "author": author, "rating": rating, "description": description }
+
+            cells[1].innerHTML = title;
+            cells[2].innerHTML = author
+            cells[3].innerHTML = rating;
+            cells[4].innerHTML = description;
+
+            let td = e.target.parentNode
+            let buttons = td.getElementsByTagName("button");
+            buttons[0].classList.remove("d-none")
+            buttons[1].classList.add("d-none")
+
+            var body = JSON.stringify({ "_id": cells[0].innerHTML, "review": updatedReview, "user": user })
+
+            fetch('/update', {
+                    method: 'POST',
+                    body,
+                    headers: {
+                        "Content-Type": "application/json"
+                    }
+                })
+                .then(function(response) {
+                    response.text().then(function(textdata) {
+                        console.log(JSON.parse(textdata))
+                    })
+                })
+        }
+
+    }
+  }
 
 }
 
@@ -85,7 +194,7 @@ class App extends React.Component {
         </form>
 
         <div class="justify-content-center mt-5 ">
-        <table width="70%" id="reviews">
+        <table width="70% mb-5" id="reviews">
             <colgroup>
                 <col width="10%"/>
                 <col width="10%"/>
@@ -106,7 +215,7 @@ class App extends React.Component {
                 </tr>
             </thead>
             <tbody id="tableBody">
-                { this.state.reviews.map( (review) => <Review key={review._id} title={review.review.title} author={review.review.author} 
+                { this.state.reviews.map( (review) => <Review id={review._id} title={review.review.title} author={review.review.author} 
                   rating={review.review.rating} description={review.review.description}/> ) }
             </tbody>
         </table>
@@ -120,22 +229,24 @@ class App extends React.Component {
 
  
   // add a new review item
-  add( evt ) {
-    let inputTitle = document.querySelector('input').value
-    let inputAuthor = document.querySelector('input').value
-    let inputRating = document.querySelector('input').value
-    let inputDescription = document.querySelector('input').value
+  add( e ) {
 
-    if (inputTitle === '' || inputAuthor === '' ||
-        inputRating === '' || inputDescription === '') {
-    // if (!inputTitle.trim() || !inputAuthor.trim() ||
-    //     !inputRating.trim()  || !inputDescription.trim() || isNaN(inputRating)) {
-    //       //strings are empty or rating is not a valid number
-    //       console.log("Data malformed")
+     // stop our form submission from refreshing the page
+     e.preventDefault();
+
+     const inputTitle = String(document.querySelector('#title').value)
+     const inputAuthor = String(document.querySelector('#author').value)
+     const inputRating = String(document.querySelector('#rating').value)
+     const inputDescription = String(document.querySelector('#description').value) 
+
+    if (!inputTitle.trim() || !inputAuthor.trim() ||
+        !inputRating.trim()  || !inputDescription.trim()) {
+          //strings are empty or rating is not a valid number
+          console.log("Data malformed")
     } else {
 
         let newReview = { "title": inputTitle, "author": inputAuthor, "rating": inputRating, "description": inputDescription }
-        console.log("newReview: ", newReview)
+
         fetch( '/add', { 
           method:'POST',
           body: JSON.stringify({ "review": newReview, "user": user}),
@@ -143,13 +254,11 @@ class App extends React.Component {
         })
           .then( response => response.json() )
           .then( json => {
-              // let updatedReviews = this.state.reviews
-              // updatedReviews.add(json)
-              // this.setState({ reviews:updatedReviews }) 
+            // reset form
+            let reviewsForm = document.getElementById("form");
+            reviewsForm.reset();
 
-              // reset form
-              let reviewsForm = document.getElementById("form");
-              reviewsForm.reset();
+            this.setState({ reviews:json }) 
           })
     }
   }
