@@ -1,0 +1,28 @@
+{
+  "name": "empty-project",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "scripts": {
+    "clean": "rm dist/bundle.js",
+    "start": "snowpack dev",
+    "build": "snowpack build"
+  },
+  "dependencies": {
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2"
+  },
+  "devDependencies": {
+    "body-parser": "^1.19.0",
+    "cookie-session": "^1.4.0",
+    "express": "^4.17.1",
+    "mongodb": "^4.1.2",
+    "morgan": "^1.10.0",
+    "serve-favicon": "^2.5.0",
+    "serve-static": "^1.14.1",
+    "snowpack": "^3.8.8"
+  }
+}
