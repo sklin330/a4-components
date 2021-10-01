@@ -28,11 +28,11 @@ class Review extends React.Component {
       onClick: this.handleRemove
     }, "Delete")));
   }
-  handleRemove = (event) => {
-    this.props.remove(event);
-  };
   handleSave = (event) => {
     this.props.save(event);
+  };
+  handleRemove = (event) => {
+    this.props.remove(event);
   };
   edit(e) {
     e.preventDefault();

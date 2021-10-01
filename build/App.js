@@ -157,15 +157,16 @@ class App extends React.Component {
     }
     if (target) {
       let cells = target.getElementsByTagName("td");
-      let body = JSON.stringify({_id: cells[0].innerHTML});
+      let body = JSON.stringify({_id: cells[0].innerHTML, user});
       fetch("/remove", {
         method: "POST",
         body,
         headers: {
           "Content-Type": "application/json"
         }
-      }).then((response) => {
-        this.setState({reviews: response});
+      }).then((response) => response.json()).then((json) => {
+        console.log(json);
+        this.setState({reviews: json});
       });
     }
   };
@@ -185,6 +186,14 @@ class App extends React.Component {
       if (!title.trim() || !author.trim() || !rating.trim() || !description.trim()) {
       } else {
         let updatedReview = {title, author, rating, description};
+        cells[1].innerHTML = title;
+        cells[2].innerHTML = author;
+        cells[3].innerHTML = rating;
+        cells[4].innerHTML = description;
+        let td = e.target.parentNode;
+        let buttons = td.getElementsByTagName("button");
+        buttons[0].classList.remove("d-none");
+        buttons[1].classList.add("d-none");
         var body = JSON.stringify({_id: cells[0].innerHTML, review: updatedReview, user});
         fetch("/update", {
           method: "POST",
@@ -192,8 +201,9 @@ class App extends React.Component {
           headers: {
             "Content-Type": "application/json"
           }
-        }).then(function(response) {
-          this.setState({reviews: response});
+        }).then((response) => response.json()).then((json) => {
+          console.log(json);
+          this.setState({reviews: json});
         });
       }
     }
