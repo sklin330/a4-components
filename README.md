@@ -3,7 +3,7 @@ Assignment 4 - Components
 
 ## Re-implement A3 with React
 
-Shannen Lin: http://a4-shannenlin.glitch.me
+Shannen Lin: https://a4-shannenlin.glitch.me
 
 Unlike assignment 3, I used React to implement the client-side portion of my code. I created an App component and a Review component in my JSX file in which I implemented the code for displaying/updating data. Because of that, my main.js file and main.html file had almost no code in it.
 
