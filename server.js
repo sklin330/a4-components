@@ -145,7 +145,11 @@ app.post("/remove", bodyParser.json(), (request, response) => {
     collection
         .deleteOne({ _id: ObjectId(request.body._id) })
         .then(result => {
-            response.json(result)
+            collection
+                .find({ "user": request.body.user })
+                .toArray()
+                .then(result => response.json(result))
+                .catch(err => console.log(err));
         });
 });
 
@@ -154,7 +158,11 @@ app.post('/update', bodyParser.json(), (request, response) => {
     collection
         .findOneAndUpdate({ _id: ObjectId(request.body._id) }, { $set: { review: request.body.review, user: request.body.user } })
         .then(result => {
-            response.json(result)
+            collection
+                .find({ "user": request.body.user })
+                .toArray()
+                .then(result => response.json(result))
+                .catch(err => console.log(err));
         });
 });
 

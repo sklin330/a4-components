@@ -13,40 +13,20 @@ class Review extends React.Component {
         <td colSpan="2">{this.props.description}</td>
         <td colSpan="1">
           <button class="btn btn-primary" onClick={ e => this.edit( e )}>Edit</button>
-          <button class="btn btn-success d-none" onClick={ e => this.save( e )}>Save</button>
+          <button class="btn btn-success d-none" onClick={this.handleSave}>Save</button>
         </td>
-        <td colSpan="1"><button id="delete" class="btn btn-danger" onClick={ e => this.delete( e )}>Delete</button></td>
+        <td colSpan="1"><button id="delete" class="btn btn-danger" onClick={ this.handleRemove}>Delete</button></td>
       </tr>
     }
   
-    delete(e) {
-  
-      e.preventDefault();
-  
-      e = e || window.event;
-      var target = e.target;
-      while (target && target.nodeName !== "TR") {
-          target = target.parentNode;
-      }
-      if (target) {
-  
-          let cells = target.getElementsByTagName("td");
-          let body = JSON.stringify({ "_id": cells[0].innerHTML })
-  
-          fetch('/remove', {
-              method: 'POST',
-              body,
-              headers: {
-                //bodyparser only kicks in if the content type is application/json
-                "Content-Type": "application/json"
-              }
-           })
-              .then(function(response) {
-                target.parentNode.removeChild(target)
-              })
-      }
+    handleSave = event => {
+      this.props.save(event)
     }
-  
+    
+    handleRemove = event => {
+      this.props.remove(event)
+    }
+    
     edit(e) {
       
       e.preventDefault();
@@ -78,57 +58,7 @@ class Review extends React.Component {
           buttons[1].classList.remove("d-none")
       }
     }
-  
-    save(e) {
-      e.preventDefault();
-  
-      e = e || window.event;
-      var target = e.target;
-      while (target && target.nodeName !== "TR") {
-          target = target.parentNode;
-      }
-      if (target) {
-          let cells = target.getElementsByTagName("td");
-  
-          let title = (cells[1].getElementsByTagName("input"))[0].value;
-          let author = (cells[2].getElementsByTagName("input"))[0].value;
-          let rating = (cells[3].getElementsByTagName("input"))[0].value;
-          let description = (cells[4].getElementsByTagName("textarea"))[0].value;
-          
-          if (!title.trim() || !author.trim() || !rating.trim()  || !description.trim()) {
-              //do nothing
-          } else {
-  
-              let updatedReview = { "title": title, "author": author, "rating": rating, "description": description }
-  
-              cells[1].innerHTML = title;
-              cells[2].innerHTML = author
-              cells[3].innerHTML = rating;
-              cells[4].innerHTML = description;
-  
-              let td = e.target.parentNode
-              let buttons = td.getElementsByTagName("button");
-              buttons[0].classList.remove("d-none")
-              buttons[1].classList.add("d-none")
-  
-              var body = JSON.stringify({ "_id": cells[0].innerHTML, "review": updatedReview, "user": user })
-  
-              fetch('/update', {
-                      method: 'POST',
-                      body,
-                      headers: {
-                          "Content-Type": "application/json"
-                      }
-                  })
-                  .then(function(response) {
-                      response.text().then(function(textdata) {
-                          console.log(JSON.parse(textdata))
-                      })
-                  })
-          }
-  
-      }
-    }
+
   
   }
 

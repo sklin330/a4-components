@@ -87,7 +87,7 @@ class App extends React.Component {
             </thead>
             <tbody id="tableBody">
                 { this.state.reviews.map( (review) => <Review id={review._id} title={review.review.title} author={review.review.author} 
-                  rating={review.review.rating} description={review.review.description}/> ) }
+                  rating={review.review.rating} description={review.review.description} save={this.save} remove={this.remove}/>) }
             </tbody>
         </table>
     </div>
@@ -131,6 +131,73 @@ class App extends React.Component {
 
             this.setState({ reviews:json }) 
           })
+    }
+  }
+
+  remove = e => {
+  
+    e.preventDefault();
+
+    e = e || window.event;
+    var target = e.target;
+    while (target && target.nodeName !== "TR") {
+        target = target.parentNode;
+    }
+    if (target) {
+
+        let cells = target.getElementsByTagName("td");
+        let body = JSON.stringify({ "_id": cells[0].innerHTML })
+
+        fetch('/remove', {
+            method: 'POST',
+            body,
+            headers: {
+              //bodyparser only kicks in if the content type is application/json
+              "Content-Type": "application/json"
+            }
+         })
+            .then(response => {
+              this.setState({ reviews:response }) 
+            })
+    }
+  }
+
+  save = e => {
+    e.preventDefault();
+
+    e = e || window.event;
+    var target = e.target;
+    while (target && target.nodeName !== "TR") {
+        target = target.parentNode;
+    }
+    if (target) {
+        let cells = target.getElementsByTagName("td");
+
+        let title = (cells[1].getElementsByTagName("input"))[0].value;
+        let author = (cells[2].getElementsByTagName("input"))[0].value;
+        let rating = (cells[3].getElementsByTagName("input"))[0].value;
+        let description = (cells[4].getElementsByTagName("textarea"))[0].value;
+        
+        if (!title.trim() || !author.trim() || !rating.trim()  || !description.trim()) {
+            //do nothing
+        } else {
+
+            let updatedReview = { "title": title, "author": author, "rating": rating, "description": description }
+
+            var body = JSON.stringify({ "_id": cells[0].innerHTML, "review": updatedReview, "user": user })
+
+            fetch('/update', {
+                    method: 'POST',
+                    body,
+                    headers: {
+                        "Content-Type": "application/json"
+                    }
+                })
+                .then(function(response) {
+                  this.setState({ reviews:response }) 
+                })
+        }
+
     }
   }
 }

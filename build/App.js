@@ -122,7 +122,9 @@ class App extends React.Component {
       title: review.review.title,
       author: review.review.author,
       rating: review.review.rating,
-      description: review.review.description
+      description: review.review.description,
+      save: this.save,
+      remove: this.remove
     }))))));
   }
   add(e) {
@@ -146,5 +148,55 @@ class App extends React.Component {
       });
     }
   }
+  remove = (e) => {
+    e.preventDefault();
+    e = e || window.event;
+    var target = e.target;
+    while (target && target.nodeName !== "TR") {
+      target = target.parentNode;
+    }
+    if (target) {
+      let cells = target.getElementsByTagName("td");
+      let body = JSON.stringify({_id: cells[0].innerHTML});
+      fetch("/remove", {
+        method: "POST",
+        body,
+        headers: {
+          "Content-Type": "application/json"
+        }
+      }).then((response) => {
+        this.setState({reviews: response});
+      });
+    }
+  };
+  save = (e) => {
+    e.preventDefault();
+    e = e || window.event;
+    var target = e.target;
+    while (target && target.nodeName !== "TR") {
+      target = target.parentNode;
+    }
+    if (target) {
+      let cells = target.getElementsByTagName("td");
+      let title = cells[1].getElementsByTagName("input")[0].value;
+      let author = cells[2].getElementsByTagName("input")[0].value;
+      let rating = cells[3].getElementsByTagName("input")[0].value;
+      let description = cells[4].getElementsByTagName("textarea")[0].value;
+      if (!title.trim() || !author.trim() || !rating.trim() || !description.trim()) {
+      } else {
+        let updatedReview = {title, author, rating, description};
+        var body = JSON.stringify({_id: cells[0].innerHTML, review: updatedReview, user});
+        fetch("/update", {
+          method: "POST",
+          body,
+          headers: {
+            "Content-Type": "application/json"
+          }
+        }).then(function(response) {
+          this.setState({reviews: response});
+        });
+      }
+    }
+  };
 }
 export default App;
