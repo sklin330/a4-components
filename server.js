@@ -26,7 +26,7 @@ morgan.token('body', function(req, res) {
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'))
 
 const uri =
-    "mongodb+srv://tester:tester123@cluster0.gfgtp.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";
+    "mongodb+srv://shannenk:qwGnpFVpVt1lw1Ds@cluster0.gdxrp.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
 
 const client = new mongodb.MongoClient(uri, {
     useNewUrlParser: true,
