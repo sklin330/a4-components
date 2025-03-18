@@ -28,24 +28,40 @@ app.use(morgan(':method :url :status :res[content-length] - :response-time ms :b
 const uri =
     "mongodb+srv://shannenk:qwGnpFVpVt1lw1Ds@cluster0.gdxrp.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
 
-const client = new mongodb.MongoClient(uri, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
+const client = new MongoClient(uri, {
+  serverApi: {
+    version: ServerApiVersion.v1,
+    strict: true,
+    deprecationErrors: true,
+  }
 });
 
 let collection = null;
 
-client.connect()
-    .then(() => {
-        // will create collection if it doesn't exist
-        return client.db("data").collection("data");
-    })
-    .then(__collection => {
-        // store reference to collection
-        collection = __collection
-            // blank query returns all documents
-        return collection.find({}).toArray()
-    })
+// client.connect()
+//     .then(() => {
+//         // will create collection if it doesn't exist
+//         return client.db("data").collection("data");
+//     })
+//     .then(__collection => {
+//         // store reference to collection
+//         collection = __collection
+//             // blank query returns all documents
+//         return collection.find({}).toArray()
+//     })
+async function run() {
+  try {
+    // Connect the client to the server	(optional starting in v4.7)
+    await client.connect();
+    // Send a ping to confirm a successful connection
+    await client.db("admin").command({ ping: 1 });
+    console.log("Pinged your deployment. You successfully connected to MongoDB!");
+  } finally {
+    // Ensures that the client will close when you finish/error
+    await client.close();
+  }
+}
+run().catch(console.dir);
 
 app.post("/reviews", bodyParser.json(), (request, response) => {
     if (collection !== null) {
